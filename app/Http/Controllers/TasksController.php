@@ -48,11 +48,7 @@ class TasksController extends Controller
         if(\Auth::check()) {
             $user = \Auth::user();
         }  
-        if(\Auth::id() == $user->id){
         return view('tasks.create',['user'=>$user]);
-        }else{
-            return redirect('/');
-        }
             
     }
 
@@ -64,16 +60,12 @@ class TasksController extends Controller
      */
     public function store(Request $request)
     {
-        if(\Auth::id() == $request->user()->id){
         $this->validate($request, ['status' => 'required|max:10']);
         $request->user()->tasks()->create([
             'content' => $request->content,
             'status' =>$request->status
         ]);
         return redirect('/');
-        }else{
-           return redirect('/');
-        }
     }
 
     /**
@@ -95,7 +87,7 @@ class TasksController extends Controller
                 ];
          }
          
-         if(\Auth::id() == $user->id){
+         if(\Auth::id() == $task->user_id){
        return view('tasks.show',$data);
          }else{
              return redirect('/');
