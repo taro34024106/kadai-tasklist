@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 
 use App\Task;
 
+use App\User;
+
 class TasksController extends Controller
 {
     /**
@@ -15,9 +17,18 @@ class TasksController extends Controller
      */
     public function index()
     {
-        $tasks = Task::all();
+        $data = [];
+        if(\Auth::check()) {
+            $user = \Auth::user();
+            $tasks = $user->tasks()->get();
+            
         
-        return view('tasks.index',['tasks' => $tasks,]);
+            $data = [
+                'user' => $user,
+                'tasks' => $tasks
+            ];
+        }
+        return view('welcome',$data);
     }
 
     /**
@@ -27,9 +38,13 @@ class TasksController extends Controller
      */
     public function create()
     {
-        $task = new Task;
+       
+        if(\Auth::check()) {
+            $user = \Auth::user();
+        }  
         
-        return view('tasks.create',['task' => $task]);
+        return view('tasks.create',['user'=>$user]);
+            
     }
 
     /**
@@ -41,11 +56,11 @@ class TasksController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, ['status' => 'required|max:10']);
-        $task = new Task;
-        $task->content = $request->content;
-        $task->status = $request->status;
-        $task->save();
-        
+        $request->user()->tasks()->create([
+            'content' => $request->content,
+            'status' =>$request->status
+        ]);
+
         return redirect('/');
     }
 
@@ -57,9 +72,17 @@ class TasksController extends Controller
      */
     public function show($id)
     {
-        $task = Task::find($id);
-        
-        return view('tasks.show',['task' => $task,]);
+        $data = [];
+         if(\Auth::check()) {
+            $user = \Auth::user();
+            $task = Task::find($id);
+            
+            $data = [
+                'user'=>$user,
+                'task'=>$task
+                ];
+         }
+       return view('tasks.show',$data);
     }
 
     /**
